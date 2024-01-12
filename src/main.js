@@ -69,7 +69,7 @@ async function getImg(userSearchRequest) {
       lightbox.refresh();
     }
   } catch (error) {
-    iziToastMess('Oop.. somethings. went wrong. Please try again.');
+    iziToastMessage('Oop.. somethings. went wrong. Please try again.');
   } finally {
     loadingMessage.classList.add('hidden');
   }
