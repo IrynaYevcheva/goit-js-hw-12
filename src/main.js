@@ -82,7 +82,7 @@ function renderImages(images) {
       img =>
         `<li class="gallery-item">
         <a href="${img.largeImageURL}">
-          <img class="gallery-img" src="${img.webformatURL}" alt="${img.tags}" />
+          <img class="gallery-img" src="${img.webformatURL}" alt="${img.tags}" loading="lazy"/>
         </a>
         <div class="image-info">
           <div>Likes:<span>${img.likes}</span></div>
