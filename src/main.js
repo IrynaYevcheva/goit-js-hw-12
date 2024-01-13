@@ -8,31 +8,14 @@ const gallery = document.querySelector('#gallery');
 const loadingMessage = document.querySelector('.loader');
 const loaderButton = document.querySelector('.loader-button');
 
-let page = 1;
 const per_page = 40;
+let page = 1;
 let userSearchRequest;
 
-form.addEventListener('submit', fetchImg);
-loaderButton.addEventListener('click', onClickLoading);
+form.addEventListener('submit', onSearch);
+loaderButton.addEventListener('click', onLoadMore);
 
-async function onClickLoading() {
-  loaderButton.classList.add('hidden');
-  loadingMessage.classList.remove('hidden');
-  await getImg(userSearchRequest);
-}
-
-function onClickLoadingBtn(totalHits) {
-  const totalPages = Math.ceil(totalHits / per_page);
-  if (page > totalPages) {
-    iziToastMessage(
-      'We are sorry, but you have reached the end of search results.'
-    );
-  } else {
-    loaderButton.classList.remove('hidden');
-  }
-}
-
-async function fetchImg(event) {
+async function onSearch(event) {
   event.preventDefault();
   loadingMessage.classList.remove('hidden');
   gallery.innerHTML = '';
@@ -40,10 +23,17 @@ async function fetchImg(event) {
   userSearchRequest = event.currentTarget.elements.inputToSearch.value.trim();
   event.currentTarget.reset();
   loaderButton.classList.add('hidden');
-  await getImg(userSearchRequest);
+  await fetchImg(userSearchRequest);
 }
 
-async function getImg(userSearchRequest) {
+async function onLoadMore() {
+  loaderButton.classList.add('hidden');
+  loadingMessage.classList.remove('hidden');
+  page += 1;
+  await fetchImg(userSearchRequest);
+}
+
+async function fetchImg(userSearchRequest) {
   try {
     const searchParams = new URLSearchParams({
       key: '41535570-7b1028e1c6f1b041bb0744cc1',
@@ -65,18 +55,17 @@ async function getImg(userSearchRequest) {
       loaderButton.classList.add('hidden');
     } else {
       renderImages(images);
-      onClickLoadingBtn(images.totalHits);
+      addLoadingBtn(images.totalHits);
       lightbox.refresh();
     }
   } catch (error) {
-    iziToastMessage('Oop.. somethings. went wrong. Please try again.');
+    iziToastMessage(`Api request error: ${error}`);
   } finally {
     loadingMessage.classList.add('hidden');
   }
 }
 
 function renderImages(images) {
-  page += 1;
   const markup = images.hits
     .map(
       img =>
@@ -94,11 +83,27 @@ function renderImages(images) {
     )
     .join('');
   gallery.insertAdjacentHTML('beforeend', markup);
-  const scrollItem = document
-    .querySelector('.gallery-item')
-    .getBoundingClientRect().height;
+}
+
+function addLoadingBtn(totalHits) {
+  const totalPages = Math.ceil(totalHits / per_page);
+  if (page >= totalPages) {
+    iziToastMessage(
+      'We are sorry, but you have reached the end of search results.'
+    );
+  } else {
+    loaderButton.classList.remove('hidden');
+    if (page >= 2) {
+      scroll();
+    }
+  }
+}
+
+function scroll() {
+  const scrollItem = document.querySelector('.gallery-item');
+  const galleryItemHeight = scrollItem.getBoundingClientRect().height;
   window.scrollBy({
-    top: scrollItem.height * 2.0,
+    top: galleryItemHeight * 2.0,
     left: 0,
     behavior: 'smooth',
   });
